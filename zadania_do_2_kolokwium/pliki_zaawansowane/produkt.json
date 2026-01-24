@@ -1,0 +1,11 @@
+{
+  "nazwa_produktu": "Smartfon XYZ",
+  "id_produktu": "prod-12345",
+  "cena": "1999.99",
+  "dostepny": true,
+  "tagi": ["elektronika", "nowość"],
+  "specyfikacja": {
+    "procesor": "SuperChip 1000",
+    "ram_gb": 8
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "nazwa_hosta": "localhost",
+  "port": 8080,
+  "debug_mode": true,
+  "baza_danych": {
+    "uzytkownik": "admin",
+    "haslo": "super_tajne_haslo_123"
+  },
+  "wspierane_api": [
+    "users",
+    "products"
+  ]
+}

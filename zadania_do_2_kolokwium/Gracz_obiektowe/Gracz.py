@@ -1,9 +1,36 @@
 from dataclasses import dataclass
 from functools import total_ordering
+from abc import ABC, abstractmethod
 
 
 class BrakPunktowZdrowiaError(Exception):
     pass
+
+
+class Bohater(ABC):
+    @abstractmethod
+    def atakuj(self) -> str:
+        pass
+
+    @abstractmethod
+    def opis(self) -> str:
+        pass
+
+
+class StrategiaAtaku(ABC):
+    @abstractmethod
+    def atakuj(self) -> str:
+        pass
+
+
+class AtakMieczem(StrategiaAtaku):
+    def atakuj(self) -> str:
+        return "Cios mieczem *CIACH*"
+
+
+class AtakKulaOgnia(StrategiaAtaku):
+    def atakuj(self) -> str:
+        return "Rzut kula ognia *BACH*"
 
 
 class NieujemnaLiczba:
@@ -59,14 +86,29 @@ class Ekwipunek():
 class Gracz(Ekwipunek):
     liczba_graczy = 0
 
-    def __init__(self, imie, hp):
+    def __init__(self, imie, hp, strategia=None):
         super().__init__()
         self.imie = imie
         self._hp = int(hp)
+        self.strategia = strategia
         Gracz.liczba_graczy += 1
 
+        if strategia is None:
+            self.strategia = AtakMieczem()
+        else:
+            self.strategia = strategia
+
+    def wykonaj_atak(self):
+        print(f"{self.imie} atakuje: {self.strategia.atakuj()}")
+
+    def zmien_strategie(self, nowa_strategia: StrategiaAtaku):
+        self.strategia = nowa_strategia
+
+    def pokaz_status_graczy(self):
+        return f"liczba graczy: {self.liczba_graczy}"
+
     def przedstaw_sie(self):
-        return f"Gracz {self.imie} (HP: {self.hp}), liczba graczy {self.liczba_graczy}"
+        return f"Gracz {self.imie} (HP: {self.hp})"
 
     def otrzymaj_obrazenia(self, ilosc):
         self.hp -= ilosc
@@ -108,7 +150,7 @@ class Gracz(Ekwipunek):
         return self.hp < other.hp
 
 
-class Wojownik(Gracz):
+class Wojownik(Gracz, Bohater):
     sila = NieujemnaLiczba()
 
     def __init__(self, imie, hp, sila):
@@ -118,6 +160,12 @@ class Wojownik(Gracz):
     def przedstaw_sie(self):
         tekst = super().przedstaw_sie()
         return f"{tekst}, Sila: {self.sila}"
+
+    def atak(self) -> int:
+        return 10
+
+    def opis(self) -> str:
+        return "wojownik"
 
     def atak(self):
         if self.hp <= 0:
@@ -160,26 +208,39 @@ class PunktLekki:
         self.y = y
 
 
+def fabryka_postaci(typ, imie):
+    if typ == "wojownik":
+        return Wojownik(imie, 120, 25)
+    elif typ == "mag":
+        return Mag(imie, 80, 50)
+    else:
+        raise ValueError(f"Typ {typ} nie istnieje")
+
+
 gracz1 = Gracz("Artur", 100)
 gracz1.__setitem__("Bron", "Ostrze gyatow")
 print(gracz1.sprawdz_poprawnosc_imienia("Artur"))
 gracz1.__setitem__("Ochrona", "tarcza")
 print(gracz1.przedstaw_sie())
 print(gracz1.przedmioty)
+gracz = Gracz("Aragorn", 100, AtakKulaOgnia())
+gracz.wykonaj_atak()
 
 gracz2 = Gracz("Przemek", 120)
 gracz2.hp = -100
 
 woj1 = Wojownik("Garen", 25, 59)
-woj2 = Wojownik("Aatrox", 150, 99)
+woj2 = fabryka_postaci("wojownik", "Aatrox")
+
+#  nieznany = fabryka_postaci("paladyn", "Netos")
 
 fuzja = woj1 + woj2
 print(fuzja.przedstaw_sie())
 
-mag1 = Mag("Syndra", 80, -10)
-
 berserker = Wojownik.stworz_berserkera("Olaf")
 print(berserker.przedstaw_sie(), "\n")
+
+mag1 = fabryka_postaci("mag", "Nadeos")
 
 druzyna = (gracz1, gracz2, mag1, woj1, woj2, berserker)
 posortowani = sorted(druzyna, key=Gracz.przedstaw_sie)
@@ -204,20 +265,17 @@ print("\nTest iteracji ekwipunku: ")
 for przedmiot in ekw:
     print(przedmiot)
 
-
-p = PunktLekki(1, 2)
-print("\n")
-print(p.x)
-print(p.y)
-
-try:
-    p.z = 3
-except AttributeError as e:
-    print(e)
-
-try:
-    print(p.__dict__)
-except AttributeError as e:
-    print(e)
-
-
+# p = PunktLekki(1, 2)
+# print("\n")
+# print(p.x)
+# print(p.y)
+#
+# try:
+#     p.z = 3
+# except AttributeError as e:
+#     print(e)
+#
+# try:
+#     print(p.__dict__)
+# except AttributeError as e:
+#     print(e)
